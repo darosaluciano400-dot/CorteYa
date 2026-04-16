@@ -1,0 +1,164 @@
+import React, { useState } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyDA32bBvJIkNJYYUJLap87wumB6LVgjJys',
+  authDomain: 'corte-ya-89f91.firebaseapp.com',
+  projectId: 'corte-ya-89f91',
+  storageBucket: 'corte-ya-89f91.firebasestorage.app',
+  messagingSenderId: '634364870009',
+  appId: '1:634364870009:web:c3b64214613f45683a43a8'
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+export default function CorteYaAppFinal() {
+  const [nombre, setNombre] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [direccion, setDireccion] = useState('');
+
+  const guardarSolicitud = async () => {
+    try {
+      await addDoc(collection(db, 'pedidos'), {
+        cliente: nombre,
+        telefono: telefono,
+        direccion: direccion,
+        servicio: 'Corte de pasto',
+        estado: 'pendiente',
+        fecha: new Date()
+      });
+      alert('Solicitud enviada correctamente');
+    } catch (error) {
+      alert('Error al guardar el pedido');
+      console.error(error);
+    }
+  };
+
+  const storage = getStorage();
+
+  const subirImagenes = async (files) => {
+    const urls = [];
+    for (const file of files) {
+      const fileRef = ref(storage, `trabajos/${Date.now()}-${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      urls.push(url);
+    }
+    console.log('Imágenes subidas:', urls);
+    return urls;
+  };
+
+  const servicioDemo = {
+    tipo: 'Corte de pasto',
+    direccion: 'Las Piedras',
+    estado: 'Informe pendiente de aprobación',
+    informe: {
+      antes: 'Foto antes del trabajo',
+      despues: 'Foto después del trabajo',
+      detalle: 'Se realizó corte completo, bordes y limpieza final.',
+      monto: '$ 2.500'
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-gray-900">
+      <header className="bg-green-700 text-white p-6 shadow">
+        <h1 className="text-3xl font-bold">CorteYa</h1>
+        <p className="text-sm">Servicios de corte de pasto y jardinería en Uruguay</p>
+      </header>
+
+      <main className="max-w-6xl mx-auto p-6 grid gap-6 md:grid-cols-3">
+        <section className="md:col-span-3 border rounded-2xl p-5 shadow-sm bg-green-50">
+          <h2 className="text-xl font-semibold mb-3">Seguimiento del césped</h2>
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+            <div className="bg-green-600 h-4 rounded-full" style={{ width: '65%' }}></div>
+          </div>
+          <p className="text-sm">Crecimiento estimado: 65% · Próximo corte sugerido en 4 días</p>
+        </section>
+
+        <section className="border rounded-2xl p-5 shadow-sm">
+          <h2 className="text-xl font-semibold mb-3">Cliente</h2>
+          <input value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full border p-2 rounded mb-2" placeholder="Nombre" />
+          <input value={telefono} onChange={(e) => setTelefono(e.target.value)} className="w-full border p-2 rounded mb-2" placeholder="Teléfono" />
+          <input value={direccion} onChange={(e) => setDireccion(e.target.value)} className="w-full border p-2 rounded mb-2" placeholder="Dirección" />
+          <select className="w-full border p-2 rounded mb-2">
+            <option>100-200 m²</option>
+            <option>200-400 m²</option>
+            <option>400+ m²</option>
+          </select>
+          <button onClick={guardarSolicitud} className="w-full bg-green-600 text-white rounded p-2">
+            Solicitar servicio
+          </button>
+        </section>
+
+        <section className="border rounded-2xl p-5 shadow-sm">
+          <h2 className="text-xl font-semibold mb-3">Prestador</h2>
+          <div className="mb-3 text-sm border rounded p-2 bg-gray-50">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-xs">FOTO</div>
+              <div><strong>Juan Jardinería</strong></div>
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-2">Subir fotos de trabajos</label>
+              <input type="file" accept="image/*" multiple className="w-full border rounded p-2 mb-3" onChange={(e) => subirImagenes(Array.from(e.target.files))} />
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="border rounded p-2 text-xs text-center">Trabajo 1</div>
+              <div className="border rounded p-2 text-xs text-center">Trabajo 2</div>
+              <div className="border rounded p-2 text-xs text-center">Trabajo 3</div>
+            </div>
+
+            <div>⭐ 4.8 promedio · 127 trabajos</div>
+            <div>Especialidad: corte premium, poda y mantenimiento</div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="border rounded p-3">Servicio disponible - $2500</div>
+            <button className="w-full bg-black text-white rounded p-2">Tomar servicio</button>
+          </div>
+        </section>
+
+        <section className="border rounded-2xl p-5 shadow-sm">
+          <h2 className="text-xl font-semibold mb-3">Informe para aprobación del cliente</h2>
+          <div className="space-y-2 text-sm">
+            <div><strong>Servicio:</strong> {servicioDemo.tipo}</div>
+            <div><strong>Dirección:</strong> {servicioDemo.direccion}</div>
+            <div><strong>Estado:</strong> {servicioDemo.estado}</div>
+            <div><strong>Antes:</strong> {servicioDemo.informe.antes}</div>
+            <div><strong>Después:</strong> {servicioDemo.informe.despues}</div>
+            <div><strong>Detalle:</strong> {servicioDemo.informe.detalle}</div>
+            <div><strong>Total a pagar:</strong> {servicioDemo.informe.monto}</div>
+            <button className="w-full bg-green-700 text-white rounded p-2">Aprobar y pagar</button>
+
+            <div className="mt-4 border-t pt-3">
+              <p className="text-sm font-medium mb-2">Valorar al prestador</p>
+              <div className="flex gap-2 mb-2">
+                <button className="px-2 py-1 border rounded">⭐ 1</button>
+                <button className="px-2 py-1 border rounded">⭐ 2</button>
+                <button className="px-2 py-1 border rounded">⭐ 3</button>
+                <button className="px-2 py-1 border rounded">⭐ 4</button>
+                <button className="px-2 py-1 border rounded">⭐ 5</button>
+              </div>
+              <textarea className="w-full border rounded p-2 text-sm" placeholder="Comentá cómo fue el servicio"></textarea>
+              <button className="w-full mt-2 bg-black text-white rounded p-2">Enviar valoración</button>
+            </div>
+          </div>
+        </section>
+
+        <section className="border rounded-2xl p-5 shadow-sm">
+          <h2 className="text-xl font-semibold mb-3">Administrador</h2>
+          <div className="space-y-2 text-sm">
+            <div>Pedidos activos: 12</div>
+            <div>Prestadores online: 4</div>
+            <div>Ingresos hoy: $ 8.500</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
