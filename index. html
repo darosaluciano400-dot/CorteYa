@@ -1,13 +1,11 @@
+
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CorteYa</title>
-</head>
-<body>
-  <h1 style="text-align:center; margin-top:50px;">CorteYa 🌿</h1>
-  <p style="text-align:center;">Tu app de jardinería ya está online</p>
-</body>
+<html>
+  <head>
+    <title>CorteYa</title>
+  </head>
+  <body>
+    <h1>CorteYa 🌿</h1>
+    <p>La app ya está funcionando</p>
+  </body>
 </html>
-<!-- update -->
